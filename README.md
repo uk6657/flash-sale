@@ -14,7 +14,7 @@
 | 安全 | JWT + 角色（USER / ADMIN）、BCrypt |
 | 工程 | Docker Compose、Nginx 反代、Actuator、springdoc OpenAPI、集成测试 |
 
-## 核心能力（面试可讲）
+## 核心能力
 
 - **秒杀链路**：活动校验 → Redis 限流 → Lua 原子扣库存 + 防重复 → 排队结果 → 本地消息表 → MQ → 异步建单 / DB CAS 扣库存
 - **缓存**：缓存穿透（空值）、击穿（互斥重建）、逻辑过期异步刷新
@@ -38,7 +38,7 @@
  MySQL Redis RabbitMQ
 ```
 
-秒杀主路径（简化）：
+秒杀主路径：
 
 ```text
 预热库存到 Redis
@@ -50,7 +50,7 @@
     → GET /api/activities/{id}/result 查询结果
 ```
 
-## 快速启动（推荐：中间件 Docker + IDEA 跑应用）
+## 快速启动
 
 ### 1. 启动依赖
 
@@ -122,7 +122,7 @@ proxy_pass http://app:8080;
 
 （本地 IDEA 开发请继续使用 `host.docker.internal`。）
 
-## 典型业务步骤（手工联调）
+## 典型业务步骤
 
 1. 注册 / 登录，拿到 JWT  
 2. 管理员创建商品、创建秒杀活动  
@@ -143,7 +143,7 @@ dev 环境另有 `/api/test/**` 压测辅助接口（需管理员）。
 或在 IDE 中运行 `src/test/java` 下的集成测试。  
 `@SpringBootTest` 会启动完整上下文并连接本机/Docker 中的依赖，**无需**再手动起一遍主程序（注意端口与数据源配置一致）。
 
-## 项目结构（简要）
+## 项目结构
 
 ```text
 src/main/java/com/study/flashsale
@@ -160,11 +160,6 @@ docker-compose.yml
 Dockerfile
 ```
 
-## 设计取舍说明
-
-- **单体而非微服务**：秒杀边界清晰，避免为拆而拆；深度放在 Redis / MQ / 一致性。  
-- **HTTP 统一 200 + body.code**：业务错误通过 `Result.code` 表达（如 400/401/404/1000），便于前端统一处理。  
-- **未引入**：Spring Cloud、ES、分库分表、Caffeine、验证码等——非实习必备，需要时可再扩展。
 
 ## License
 
