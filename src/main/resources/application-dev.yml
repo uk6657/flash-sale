@@ -1,0 +1,44 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: ${DB_URL:jdbc:mysql://localhost:3306/flash_sale?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false&allowPublicKeyRetrieval=true}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:123456}
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:16379}
+      database: ${REDIS_DATABASE:0}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:flashsale}
+    password: ${RABBITMQ_PASSWORD:flashsale123}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+
+mybatis-plus:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+logging:
+  level:
+    root: info
+    com.study.flashsale: debug
+
+jwt:
+  secret: ${JWT_SECRET:flash-sale-study-secret-key-for-jwt-login-demo-2026}
+  expire-seconds: ${JWT_EXPIRE_SECONDS:7200}
+
+flash-sale:
+  admin:
+    init-enabled: ${ADMIN_INIT_ENABLED:true}
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD:admin123456}
+    nickname: ${ADMIN_NICKNAME:系统管理员}
+
+management:
+  endpoint:
+    health:
+      show-details: always

@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    # 生产环境必须通过环境变量注入，不提供本地默认值
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+  data:
+    redis:
+      host: ${REDIS_HOST}
+      port: ${REDIS_PORT}
+      database: ${REDIS_DATABASE:0}
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST}
+    port: ${RABBITMQ_PORT}
+    username: ${RABBITMQ_USERNAME}
+    password: ${RABBITMQ_PASSWORD}
+    virtual-host: ${RABBITMQ_VIRTUAL_HOST:/}
+
+logging:
+  level:
+    root: warn
+    com.study.flashsale: info
+
+jwt:
+  secret: ${JWT_SECRET}
+  expire-seconds: ${JWT_EXPIRE_SECONDS:7200}
+
+flash-sale:
+  admin:
+    init-enabled: ${ADMIN_INIT_ENABLED:false}
+    username: ${ADMIN_USERNAME:admin}
+    password: ${ADMIN_PASSWORD}
+    nickname: ${ADMIN_NICKNAME:系统管理员}
