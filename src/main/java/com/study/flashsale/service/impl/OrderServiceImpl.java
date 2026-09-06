@@ -186,7 +186,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (OrderStatus.isPayFailed(order.getStatus())) {
             throw new BusinessException("订单支付失败，不能重复支付");
         }
-        if (!OrderStatus.canPay(order.getStatus())) {
+        if (OrderStatus.cannotPay(order.getStatus())) {
             throw new BusinessException("订单状态不允许支付");
         }
 
@@ -228,7 +228,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (OrderStatus.isPayFailed(order.getStatus())) {
             throw new BusinessException("订单支付失败，不能取消");
         }
-        if (!OrderStatus.canCancel(order.getStatus())) {
+        if (OrderStatus.cannotCancel(order.getStatus())) {
             throw new BusinessException("订单状态不允许取消");
         }
 
@@ -273,7 +273,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
         if (OrderStatus.isCanceled(order.getStatus())) {
             throw new BusinessException("订单已取消，不能标记支付失败");
         }
-        if (!OrderStatus.canFailPay(order.getStatus())) {
+        if (OrderStatus.cannotFailPay(order.getStatus())) {
             throw new BusinessException("订单状态不允许标记支付失败");
         }
 
@@ -340,7 +340,7 @@ public class OrderServiceImpl extends ServiceImpl<OrderMapper, Order> implements
             return;
         }
 
-        if (!OrderStatus.canCancel(order.getStatus())) {
+        if (OrderStatus.cannotCancel(order.getStatus())) {
             return;
         }
 

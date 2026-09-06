@@ -13,6 +13,8 @@ import org.springframework.web.servlet.HandlerInterceptor;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.springframework.util.AntPathMatcher;
 
 @Component
@@ -35,7 +37,9 @@ public class AuthInterceptor implements HandlerInterceptor {
     };
 
     @Override
-    public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) {
+    public boolean preHandle(@NonNull HttpServletRequest request,
+                             @NonNull HttpServletResponse response,
+                             @NonNull Object handler) {
         String authorization = request.getHeader("Authorization");
 
         if (!StringUtils.hasText(authorization) || !authorization.startsWith("Bearer ")) {
@@ -51,7 +55,7 @@ public class AuthInterceptor implements HandlerInterceptor {
             String role = claims.get("role", String.class);
 
             UserContext.set(userId, username, role);
-            if (isAdminApi(request) && !UserRole.isAdmin(role)) {
+            if (isAdminApi(request) && !UserRole.isAdmin(UserContext.getRole())) {
                 throw new BusinessException(ErrorCode.FORBIDDEN);
             }
 
@@ -65,7 +69,10 @@ public class AuthInterceptor implements HandlerInterceptor {
     }
 
     @Override
-    public void afterCompletion(HttpServletRequest request, HttpServletResponse response, Object handler, Exception ex) {
+    public void afterCompletion(@NonNull HttpServletRequest request,
+                                @NonNull HttpServletResponse response,
+                                @NonNull Object handler,
+                                @Nullable Exception ex) {
         UserContext.clear();
     }
 

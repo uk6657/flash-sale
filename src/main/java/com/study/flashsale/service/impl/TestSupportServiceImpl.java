@@ -1,7 +1,6 @@
 package com.study.flashsale.service.impl;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.baomidou.mybatisplus.core.conditions.update.LambdaUpdateWrapper;
 import com.study.flashsale.common.ErrorCode;
 import com.study.flashsale.common.RedisKeyConstants;
 import com.study.flashsale.dto.request.TestCreateUsersRequest;

@@ -37,7 +37,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
 
     @Override
     public ProductVO createProduct(ProductCreateRequest request) {
-        if (request.getStatus() != null && !CommonStatus.isValid(request.getStatus())) {
+        if (request.getStatus() != null && CommonStatus.isInvalid(request.getStatus())) {
             throw new BusinessException("商品状态只能是0或1");
         }
 
@@ -67,7 +67,7 @@ public class ProductServiceImpl extends ServiceImpl<ProductMapper, Product> impl
             throw new BusinessException(ErrorCode.NOT_FOUND, "商品不存在");
         }
 
-        if (!CommonStatus.isValid(request.getStatus())) {
+        if (CommonStatus.isInvalid(request.getStatus())) {
             throw new BusinessException("商品状态只能是0或1");
         }
 

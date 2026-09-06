@@ -8,7 +8,6 @@ import com.study.flashsale.service.OperationLogService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.aspectj.lang.JoinPoint;
 import org.aspectj.lang.annotation.AfterReturning;
 import org.aspectj.lang.annotation.Aspect;
 import org.springframework.stereotype.Component;
@@ -24,7 +23,7 @@ public class OperationLogAspect {
     private final OperationLogService operationLogService;
 
     @AfterReturning("@annotation(logOperation)")
-    public void recordOperationLog(JoinPoint joinPoint, LogOperation logOperation) {
+    public void recordOperationLog(LogOperation logOperation) {
         try {
             ServletRequestAttributes attributes =
                     (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();

@@ -49,7 +49,7 @@ public class CacheService {
         }
 
         if (cachedValue != null) {
-            return parseCacheValue(cachedValue, type, "缓存数据解析失败");
+            return parseCacheValue(cachedValue, type);
         }
 
         String lockToken;
@@ -233,7 +233,7 @@ public class CacheService {
             }
 
             if (cachedValue != null) {
-                return parseCacheValue(cachedValue, type, "缓存数据解析失败");
+                return parseCacheValue(cachedValue, type);
             }
         }
 
@@ -292,11 +292,11 @@ public class CacheService {
         }
     }
 
-    private <T> T parseCacheValue(String cachedValue, Class<T> type, String message) {
+    private <T> T parseCacheValue(String cachedValue, Class<T> type) {
         try {
             return objectMapper.readValue(cachedValue, type);
         } catch (JacksonException e) {
-            throw new BusinessException(message);
+            throw new BusinessException("缓存数据解析失败");
         }
     }
 

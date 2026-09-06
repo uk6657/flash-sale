@@ -12,6 +12,7 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.jspecify.annotations.NonNull;
 
 @Slf4j
 @Component
@@ -22,7 +23,7 @@ public class AdminInitializer implements ApplicationRunner {
     private final FlashSaleProperties flashSaleProperties;
 
     @Override
-    public void run(ApplicationArguments args) {
+    public void run(@NonNull ApplicationArguments args) {
         FlashSaleProperties.Admin admin = flashSaleProperties.getAdmin();
         if (!Boolean.TRUE.equals(admin.getInitEnabled())) {
             log.info("默认管理员初始化已关闭");

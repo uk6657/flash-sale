@@ -89,11 +89,15 @@ public class RabbitMqConfig {
         return () -> {
             rabbitTemplate.setMandatory(true);
             rabbitTemplate.setConfirmCallback((CorrelationData correlationData, boolean ack, String cause) -> {
-                if (correlationData == null || correlationData.getId() == null) {
+                if (correlationData == null) {
                     return;
                 }
 
                 String messageId = correlationData.getId();
+                if (messageId.isBlank()) {
+                    return;
+                }
+
                 if (ack) {
                     mqMessageService.markSent(messageId);
                     log.info("RabbitMQ confirm success, messageId={}", messageId);

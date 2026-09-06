@@ -17,6 +17,10 @@ public enum CommonStatus {
         return DISABLED.code.equals(code) || ENABLED.code.equals(code);
     }
 
+    public static boolean isInvalid(Integer code) {
+        return !isValid(code);
+    }
+
     public static String getTextByCode(Integer code) {
         for (CommonStatus status : values()) {
             if (status.getCode().equals(code)) {

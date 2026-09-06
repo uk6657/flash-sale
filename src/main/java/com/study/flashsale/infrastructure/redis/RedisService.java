@@ -5,6 +5,7 @@ import com.study.flashsale.common.ErrorCode;
 import com.study.flashsale.exception.BusinessException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
@@ -30,7 +31,7 @@ public class RedisService {
     public static final int SECKILL_STOCK_NOT_PREPARED = 2;
     public static final int SECKILL_OUT_OF_STOCK = 3;
 
-    private static final DefaultRedisScript<Long> SECKILL_SCRIPT = new DefaultRedisScript<>("""
+    private static final DefaultRedisScript<@NonNull Long> SECKILL_SCRIPT = createLongScript("""
             if redis.call('EXISTS', KEYS[1]) == 1 then
                 return 1
             end
@@ -47,15 +48,22 @@ public class RedisService {
             redis.call('DECR', KEYS[2])
             redis.call('SET', KEYS[1], '1', 'EX', ARGV[1])
             return 0
-            """, Long.class);
+            """);
 
-    private static final DefaultRedisScript<Long> UNLOCK_SCRIPT = new DefaultRedisScript<>("""
+    private static final DefaultRedisScript<@NonNull Long> UNLOCK_SCRIPT = createLongScript("""
             if redis.call('GET', KEYS[1]) == ARGV[1] then
                 return redis.call('DEL', KEYS[1])
             end
 
             return 0
-            """, Long.class);
+            """);
+
+    private static DefaultRedisScript<@NonNull Long> createLongScript(String scriptText) {
+        DefaultRedisScript<@NonNull Long> script = new DefaultRedisScript<@NonNull Long>();
+        script.setScriptText(scriptText);
+        script.setResultType(Long.class);
+        return script;
+    }
 
     private final RedisTemplate<String, String> redisTemplate;
 
@@ -68,14 +76,14 @@ public class RedisService {
     public void set(String key, String value) {
         runWithRetry("写入Redis数据", () -> {
             redisTemplate.opsForValue().set(key, value);
-            return null;
+            return Boolean.TRUE;
         });
     }
 
     public void set(String key, String value, Duration timeout) {
         runWithRetry("写入Redis数据", () -> {
             redisTemplate.opsForValue().set(key, value, timeout);
-            return null;
+            return Boolean.TRUE;
         });
     }
 
@@ -94,10 +102,6 @@ public class RedisService {
         );
     }
 
-    public Boolean hasKey(String key) {
-        return runWithRetry("判断Redis Key是否存在", () -> redisTemplate.hasKey(key));
-    }
-
     public Long getExpire(String key, TimeUnit timeUnit) {
         return runWithRetry("读取Redis Key过期时间", () -> redisTemplate.getExpire(key, timeUnit));
     }
@@ -106,16 +110,12 @@ public class RedisService {
         return runWithRetry("递增Redis数据", () -> redisTemplate.opsForValue().increment(key));
     }
 
-    public Long decrement(String key) {
-        return runWithRetry("递减Redis数据", () -> redisTemplate.opsForValue().decrement(key));
+    public void expire(String key, Duration timeout) {
+        runWithRetry("设置Redis过期时间", () -> redisTemplate.expire(key, timeout));
     }
 
-    public Boolean expire(String key, Duration timeout) {
-        return runWithRetry("设置Redis过期时间", () -> redisTemplate.expire(key, timeout));
-    }
-
-    public Boolean delete(String key) {
-        return runWithRetry("删除Redis数据", () -> redisTemplate.delete(key));
+    public void delete(String key) {
+        runWithRetry("删除Redis数据", () -> redisTemplate.delete(key));
     }
 
     public Long delete(Collection<String> keys) {
@@ -126,12 +126,12 @@ public class RedisService {
         return runWithRetry("扫描Redis Key", () -> redisTemplate.keys(pattern));
     }
 
-    public Boolean zAdd(String key, String value, double score) {
-        return runWithRetry("写入Redis ZSet", () -> redisTemplate.opsForZSet().add(key, value, score));
+    public void zAdd(String key, String value, double score) {
+        runWithRetry("写入Redis ZSet", () -> redisTemplate.opsForZSet().add(key, value, score));
     }
 
-    public Long zRemove(String key, String value) {
-        return runWithRetry("删除Redis ZSet数据", () -> redisTemplate.opsForZSet().remove(key, value));
+    public void zRemove(String key, String value) {
+        runWithRetry("删除Redis ZSet数据", () -> redisTemplate.opsForZSet().remove(key, value));
     }
 
     public Set<String> zRangeByScore(String key, double min, double max, long offset, long count) {
@@ -143,7 +143,7 @@ public class RedisService {
         long ttlSeconds = Math.max(1, userKeyTtl.getSeconds());
         Long result = runWithRetry("执行Redis秒杀Lua脚本",
                 () -> redisTemplate.execute(SECKILL_SCRIPT, List.of(userKey, stockKey), String.valueOf(ttlSeconds)));
-        return result == null ? SECKILL_STOCK_NOT_PREPARED : result.intValue();
+        return result.intValue();
     }
 
     private <T> T runWithRetry(String operationName, Supplier<T> action) {

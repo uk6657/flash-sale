@@ -35,12 +35,24 @@ public enum OrderStatus {
         return isWaitPay(status);
     }
 
+    public static boolean cannotPay(Integer status) {
+        return !canPay(status);
+    }
+
     public static boolean canCancel(Integer status) {
         return isWaitPay(status);
     }
 
+    public static boolean cannotCancel(Integer status) {
+        return !canCancel(status);
+    }
+
     public static boolean canFailPay(Integer status) {
         return isWaitPay(status);
+    }
+
+    public static boolean cannotFailPay(Integer status) {
+        return !canFailPay(status);
     }
 
     public static String getTextByCode(Integer code) {

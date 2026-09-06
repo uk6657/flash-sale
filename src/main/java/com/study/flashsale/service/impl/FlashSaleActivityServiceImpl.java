@@ -64,7 +64,7 @@ public class FlashSaleActivityServiceImpl extends ServiceImpl<FlashSaleActivityM
     @Override
     @Transactional(rollbackFor = Exception.class)
     public ActivityVO createActivity(ActivityCreateRequest request) {
-        if (request.getStatus() != null && !CommonStatus.isValid(request.getStatus())) {
+        if (request.getStatus() != null && CommonStatus.isInvalid(request.getStatus())) {
             throw new BusinessException("活动状态只能是0或1");
         }
 
@@ -88,9 +88,7 @@ public class FlashSaleActivityServiceImpl extends ServiceImpl<FlashSaleActivityM
             throw new BusinessException("秒杀价格不能高于商品原价");
         }
 
-        if (!freezeProductStock(productId, request.getSaleStock())) {
-            throw new BusinessException("商品可用库存不足");
-        }
+        freezeProductStock(productId, request.getSaleStock());
 
         FlashSaleActivity activity = new FlashSaleActivity();
         activity.setProductId(productId);
@@ -116,7 +114,7 @@ public class FlashSaleActivityServiceImpl extends ServiceImpl<FlashSaleActivityM
             throw new BusinessException("活动已开始，不能修改活动配置");
         }
 
-        if (!CommonStatus.isValid(request.getStatus())) {
+        if (CommonStatus.isInvalid(request.getStatus())) {
             throw new BusinessException("活动状态只能是0或1");
         }
 
@@ -140,8 +138,8 @@ public class FlashSaleActivityServiceImpl extends ServiceImpl<FlashSaleActivityM
         }
 
         int stockDiff = request.getSaleStock() - oldActivity.getSaleStock();
-        if (stockDiff > 0 && !freezeProductStock(oldActivity.getProductId(), stockDiff)) {
-            throw new BusinessException("商品可用库存不足");
+        if (stockDiff > 0) {
+            freezeProductStock(oldActivity.getProductId(), stockDiff);
         }
         if (stockDiff < 0) {
             releaseProductStock(oldActivity.getProductId(), -stockDiff);
@@ -163,14 +161,16 @@ public class FlashSaleActivityServiceImpl extends ServiceImpl<FlashSaleActivityM
         return toActivityVO(getById(id));
     }
 
-    private boolean freezeProductStock(Long productId, Integer freezeStock) {
+    private void freezeProductStock(Long productId, Integer freezeStock) {
         LambdaUpdateWrapper<Product> updateWrapper = new LambdaUpdateWrapper<>();
         updateWrapper.eq(Product::getId, productId);
         updateWrapper.eq(Product::getStatus, 1);
         updateWrapper.apply("stock - lock_stock >= {0}", freezeStock);
         updateWrapper.setSql("lock_stock = lock_stock + " + freezeStock);
 
-        return productMapper.update(null, updateWrapper) > 0;
+        if (productMapper.update(null, updateWrapper) == 0) {
+            throw new BusinessException("商品可用库存不足");
+        }
     }
 
     private void releaseProductStock(Long productId, Integer releaseStock) {

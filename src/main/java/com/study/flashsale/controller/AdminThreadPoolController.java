@@ -5,7 +5,6 @@ import com.study.flashsale.common.Result;
 import com.study.flashsale.dto.response.ThreadPoolStatusResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -17,11 +16,15 @@ import java.util.concurrent.ThreadPoolExecutor;
 @Tag(name = "管理端-线程池")
 @RestController
 @RequestMapping("/api/admin/thread-pools")
-@RequiredArgsConstructor
 public class AdminThreadPoolController {
 
-    @Qualifier("orderTaskExecutor")
     private final ThreadPoolTaskExecutor orderTaskExecutor;
+
+    public AdminThreadPoolController(
+            @Qualifier("orderTaskExecutor") ThreadPoolTaskExecutor orderTaskExecutor
+    ) {
+        this.orderTaskExecutor = orderTaskExecutor;
+    }
 
     @Operation(summary = "查询订单线程池状态")
     @LogOperation("查询订单线程池状态")
